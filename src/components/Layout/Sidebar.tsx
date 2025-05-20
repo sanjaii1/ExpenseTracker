@@ -14,6 +14,8 @@ import {
   X
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { supabase } from '../../lib/supabase';
+import toast from 'react-hot-toast';
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -43,9 +45,10 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, isActive, onClic
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  session: any;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, session }) => {
   const { theme, toggleTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -58,6 +61,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     { id: 'analytics', label: 'Analytics', icon: <PieChart size={20} /> },
     { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
   ];
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success('Signed out successfully');
+    } catch (error) {
+      toast.error('Error signing out');
+    }
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -128,7 +141,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </button>
           </div>
-          <button className="flex items-center w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+          <button 
+            onClick={handleSignOut}
+            className="flex items-center w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
             <LogOut size={20} className="mr-3" />
             <span>Sign Out</span>
           </button>

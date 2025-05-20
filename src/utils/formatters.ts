@@ -1,15 +1,16 @@
-export const formatCurrency = (amount: number, currency = 'USD'): string => {
-  return new Intl.NumberFormat('en-US', {
+export const formatCurrency = (amount: number, currency = 'IRR'): string => {
+  const formatter = new Intl.NumberFormat('fa-IR', {
     style: 'currency',
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return formatter.format(amount);
 };
 
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('fa-IR', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -18,7 +19,7 @@ export const formatDate = (dateString: string): string => {
 
 export const formatMonthYear = (dateString: string): string => {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('fa-IR', {
     year: 'numeric',
     month: 'long',
   }).format(date);
@@ -41,7 +42,7 @@ export const getLastNMonths = (n: number): string[] => {
   for (let i = 0; i < n; i++) {
     const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
     months.push(
-      new Intl.DateTimeFormat('en-US', { month: 'short' }).format(month)
+      new Intl.DateTimeFormat('fa-IR', { month: 'short' }).format(month)
     );
   }
   
