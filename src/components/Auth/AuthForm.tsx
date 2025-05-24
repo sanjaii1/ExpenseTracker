@@ -131,11 +131,11 @@ function AuthForm({ onSuccess }: AuthFormProps) {
         </div>
 
         {/* Connection Test Button */}
-        <div className="text-center">
+        {/* <div className="text-center">
           <Button type="button" variant="outline" size="sm" onClick={handleTestConnection} disabled={testing}>
             {testing ? "Testing..." : "Test Connection"}
           </Button>
-        </div>
+        </div> */}
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
@@ -195,11 +195,11 @@ function AuthForm({ onSuccess }: AuthFormProps) {
         </div>
 
         {/* Debug info */}
-        <div className="text-center">
+        {/* <div className="text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             For testing: Use any email and password (min 6 chars)
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   )
