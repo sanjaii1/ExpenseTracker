@@ -1,55 +1,53 @@
-export const formatCurrency = (amount: number, currency = 'INR'): string => {
-  const formatter = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
+export const formatCurrency = (amount: number, currency = "INR"): string => {
+  const formatter = new Intl.NumberFormat("en-IN", {
+    style: "currency",
     currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  });
-  return formatter.format(amount);
-};
+  })
+  return formatter.format(amount)
+}
 
 export const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('fa-IR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-};
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date)
+}
 
 export const formatMonthYear = (dateString: string): string => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('fa-IR', {
-    year: 'numeric',
-    month: 'long',
-  }).format(date);
-};
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+  }).format(date)
+}
 
 export const getCurrentMonth = (): string => {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-};
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0]
+}
 
 export const getCurrentMonthEnd = (): string => {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-};
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0]
+}
 
 export const getLastNMonths = (n: number): string[] => {
-  const months = [];
-  const now = new Date();
-  
+  const months = []
+  const now = new Date()
+
   for (let i = 0; i < n; i++) {
-    const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push(
-      new Intl.DateTimeFormat('fa-IR', { month: 'short' }).format(month)
-    );
+    const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    months.push(new Intl.DateTimeFormat("en-US", { month: "short" }).format(month))
   }
-  
-  return months.reverse();
-};
+
+  return months.reverse()
+}
 
 export const calculatePercentage = (value: number, total: number): number => {
-  if (total === 0) return 0;
-  return Math.round((value / total) * 100);
-};
+  if (total === 0) return 0
+  return Math.round((value / total) * 100)
+}

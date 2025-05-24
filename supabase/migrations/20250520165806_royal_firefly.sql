@@ -18,7 +18,7 @@
       - description (text)
       - date (date)
       - type (text)
-      - is_recurring (boolean)
+      - isRecurring (boolean) -- Updated column name
       - created_at (timestamp)
     
     - budgets
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   description text,
   date date NOT NULL,
   type text NOT NULL CHECK (type IN ('income', 'expense')),
-  is_recurring boolean DEFAULT false,
+  "isRecurring" boolean DEFAULT false,
   created_at timestamptz DEFAULT now()
 );
 

@@ -1,23 +1,24 @@
-import React from 'react';
-import { Budget } from '../../types';
-import { useBudgets } from '../../context/BudgetContext';
-import { formatCurrency } from '../../utils/formatters';
-import { getCategoryColor } from '../../data/mockData';
+"use client"
+
+import type { Budget } from "../../types"
+import { useBudgets } from "../../context/BudgetContext"
+import { formatCurrency } from "../../utils/formatters"
+import { getCategoryColor } from "../../data/mockData"
 
 interface BudgetProgressListProps {
-  budgets: Budget[];
+  budgets: Budget[]
 }
 
-const BudgetProgressList: React.FC<BudgetProgressListProps> = ({ budgets }) => {
-  const { calculateBudgetProgress, isBudgetExceeded } = useBudgets();
+function BudgetProgressList({ budgets }: BudgetProgressListProps) {
+  const { calculateBudgetProgress, isBudgetExceeded } = useBudgets()
 
   return (
     <div className="space-y-4">
       {budgets.map((budget) => {
-        const progress = calculateBudgetProgress(budget.id);
-        const exceeded = isBudgetExceeded(budget.id);
-        const categoryColor = getCategoryColor(budget.category);
-        
+        const progress = calculateBudgetProgress(budget.id)
+        const exceeded = isBudgetExceeded(budget.id)
+        const categoryColor = getCategoryColor(budget.category)
+
         return (
           <div key={budget.id} className="space-y-2">
             <div className="flex justify-between items-center">
@@ -27,26 +28,22 @@ const BudgetProgressList: React.FC<BudgetProgressListProps> = ({ budgets }) => {
                   {formatCurrency(budget.spent)} / {formatCurrency(budget.amount)}
                 </div>
               </div>
-              <div className={`text-sm font-medium ${exceeded ? 'text-red-500' : 'text-green-500'}`}>
-                {progress}%
-              </div>
+              <div className={`text-sm font-medium ${exceeded ? "text-red-500" : "text-green-500"}`}>{progress}%</div>
             </div>
             <div className="relative h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className={`absolute top-0 left-0 h-full rounded-full ${
-                  exceeded ? 'bg-red-500' : `bg-[${categoryColor}]`
-                }`}
-                style={{ 
-                  width: `${progress}%`, 
-                  backgroundColor: exceeded ? '' : categoryColor 
+                className={`absolute top-0 left-0 h-full rounded-full ${exceeded ? "bg-red-500" : ""}`}
+                style={{
+                  width: `${progress}%`,
+                  backgroundColor: exceeded ? "" : categoryColor,
                 }}
               ></div>
             </div>
           </div>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
 
-export default BudgetProgressList;
+export default BudgetProgressList

@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export interface Database {
   public: {
@@ -43,8 +37,8 @@ export interface Database {
           category: string
           description: string | null
           date: string
-          type: 'income' | 'expense'
-          is_recurring: boolean
+          type: "income" | "expense"
+          isRecurring: boolean
           created_at: string
         }
         Insert: {
@@ -54,8 +48,8 @@ export interface Database {
           category: string
           description?: string | null
           date: string
-          type: 'income' | 'expense'
-          is_recurring?: boolean
+          type: "income" | "expense"
+          isRecurring?: boolean
           created_at?: string
         }
         Update: {
@@ -65,8 +59,8 @@ export interface Database {
           category?: string
           description?: string | null
           date?: string
-          type?: 'income' | 'expense'
-          is_recurring?: boolean
+          type?: "income" | "expense"
+          isRecurring?: boolean
           created_at?: string
         }
       }
@@ -76,7 +70,7 @@ export interface Database {
           user_id: string
           category: string
           amount: number
-          period: 'weekly' | 'monthly' | 'yearly'
+          period: "weekly" | "monthly" | "yearly"
           created_at: string
         }
         Insert: {
@@ -84,7 +78,7 @@ export interface Database {
           user_id: string
           category: string
           amount: number
-          period: 'weekly' | 'monthly' | 'yearly'
+          period: "weekly" | "monthly" | "yearly"
           created_at?: string
         }
         Update: {
@@ -92,7 +86,7 @@ export interface Database {
           user_id?: string
           category?: string
           amount?: number
-          period?: 'weekly' | 'monthly' | 'yearly'
+          period?: "weekly" | "monthly" | "yearly"
           created_at?: string
         }
       }
