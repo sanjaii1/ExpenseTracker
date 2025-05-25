@@ -11,6 +11,7 @@ export interface Database {
           currency: string
           theme: string
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -19,6 +20,7 @@ export interface Database {
           currency?: string
           theme?: string
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -27,6 +29,7 @@ export interface Database {
           currency?: string
           theme?: string
           created_at?: string
+          updated_at?: string
         }
       }
       transactions: {
@@ -40,6 +43,7 @@ export interface Database {
           type: "income" | "expense"
           isRecurring: boolean
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -51,6 +55,7 @@ export interface Database {
           type: "income" | "expense"
           isRecurring?: boolean
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -62,6 +67,7 @@ export interface Database {
           type?: "income" | "expense"
           isRecurring?: boolean
           created_at?: string
+          updated_at?: string
         }
       }
       budgets: {
@@ -72,6 +78,7 @@ export interface Database {
           amount: number
           period: "weekly" | "monthly" | "yearly"
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -80,6 +87,7 @@ export interface Database {
           amount: number
           period: "weekly" | "monthly" | "yearly"
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -88,6 +96,7 @@ export interface Database {
           amount?: number
           period?: "weekly" | "monthly" | "yearly"
           created_at?: string
+          updated_at?: string
         }
       }
     }

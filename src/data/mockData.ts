@@ -34,7 +34,18 @@ export const mockCategories: Category[] = [
   { id: '9', name: 'Travel', color: '#C4B5FD', icon: 'Plane', type: 'expense' },
   { id: '10', name: 'Salary', color: '#10B981', icon: 'Briefcase', type: 'income' },
   { id: '11', name: 'Gifts', color: '#EC4899', icon: 'Gift', type: 'income' },
+  { id: '13', name: 'Insurance', color: '#F59E42', icon: 'Shield', type: 'expense' },
+  { id: '14', name: 'Pets', color: '#FCD34D', icon: 'HeartPulse', type: 'expense' },
+  { id: '15', name: 'Childcare', color: '#F472B6', icon: 'Gift', type: 'expense' },
+  { id: '16', name: 'Subscriptions', color: '#818CF8', icon: 'Smartphone', type: 'expense' },
+  { id: '17', name: 'Investments', color: '#34D399', icon: 'DollarSign', type: 'income' },
+  { id: '18', name: 'Bonuses', color: '#FBBF24', icon: 'Briefcase', type: 'income' },
+  { id: '19', name: 'Interest', color: '#60A5FA', icon: 'DollarSign', type: 'income' },
+  { id: '20', name: 'Charity', color: '#A78BFA', icon: 'Gift', type: 'expense' },
+  { id: '21', name: 'Personal Care', color: '#F87171', icon: 'ShoppingBag', type: 'expense' },
+  { id: '22', name: 'Savings', color: '#10B981', icon: 'DollarSign', type: 'both' },
   { id: '12', name: 'Other', color: '#6B7280', icon: 'DollarSign', type: 'both' },
+
 ];
 
 export const mockTransactions: Transaction[] = [

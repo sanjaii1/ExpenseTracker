@@ -276,9 +276,24 @@ export const userService = {
     // Ensure profile exists first
     await ensureUserProfile()
 
-    const { data, error } = await supabase.from("users").update(updates).eq("id", user.id).select().single()
+    console.log("Updating user profile with:", updates)
 
-    if (error) throw error
+    // Create a clean update object without undefined values
+    const cleanUpdates: any = {}
+    if (updates.name !== undefined) cleanUpdates.name = updates.name
+    if (updates.currency !== undefined) cleanUpdates.currency = updates.currency
+    if (updates.theme !== undefined) cleanUpdates.theme = updates.theme
+
+    console.log("Clean updates:", cleanUpdates)
+
+    const { data, error } = await supabase.from("users").update(cleanUpdates).eq("id", user.id).select().single()
+
+    if (error) {
+      console.error("Error updating profile:", error)
+      throw error
+    }
+
+    console.log("Profile updated successfully:", data)
     return data
   },
 
@@ -298,5 +313,15 @@ export const userService = {
 
     if (error) throw error
     return data
+  },
+
+  async deleteUserData() {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    // Delete all user data in order (due to foreign key constraints)
+    await supabase.from("transactions").delete().eq("user_id", user.id)
+    await supabase.from("budgets").delete().eq("user_id", user.id)
+    await supabase.from("users").delete().eq("id", user.id)
   },
 }
