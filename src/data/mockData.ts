@@ -44,7 +44,8 @@ export const mockCategories: Category[] = [
   { id: '20', name: 'Charity', color: '#A78BFA', icon: 'Gift', type: 'expense' },
   { id: '21', name: 'Personal Care', color: '#F87171', icon: 'ShoppingBag', type: 'expense' },
   { id: '22', name: 'Savings', color: '#10B981', icon: 'DollarSign', type: 'both' },
-  { id: '12', name: 'Other', color: '#6B7280', icon: 'DollarSign', type: 'both' },
+  { id: '23', name: 'Rent', color: '#F59E42', icon: 'DollarSign', type: 'expense' },
+  { id: '24', name: 'Other', color: '#6B7280', icon: 'DollarSign', type: 'both' },
 
 ];
 
