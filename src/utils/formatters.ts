@@ -51,3 +51,20 @@ export const calculatePercentage = (value: number, total: number): number => {
   if (total === 0) return 0
   return Math.round((value / total) * 100)
 }
+
+export const getDateRangeLabel = (startDate: string, endDate: string): string => {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  // Check if it's the same day
+  if (startDate === endDate) {
+    return formatDate(startDate)
+  }
+
+  // Check if it's the same month
+  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+    return `${start.getDate()}-${end.getDate()} ${new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(start)}`
+  }
+
+  return `${formatDate(startDate)} - ${formatDate(endDate)}`
+}
