@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { Plus, Target, TrendingUp, Calendar, DollarSign } from "lucide-react"
+import { Plus, Target, TrendingUp, Calendar, DollarSign, AlertCircle, Database, RefreshCw } from "lucide-react"
 import Card from "../UI/Card"
 import Button from "../UI/Button"
 import Modal from "../UI/Modal"
@@ -16,6 +16,8 @@ function SavingsPage() {
     savings,
     savingsTransactions,
     loading,
+    error,
+    tableExists,
     addSavings,
     updateSavings,
     deleteSavings,
@@ -24,6 +26,8 @@ function SavingsPage() {
     getTotalSavings,
     getActiveSavings,
     getCompletedSavings,
+    refetchSavings,
+    updateAllStatuses,
   } = useSavings()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -31,6 +35,7 @@ function SavingsPage() {
   const [currentSavings, setCurrentSavings] = useState<Savings | null>(null)
   const [selectedSavingsId, setSelectedSavingsId] = useState<string>("")
   const [activeTab, setActiveTab] = useState<"all" | "active" | "completed">("all")
+  const [isUpdatingStatuses, setIsUpdatingStatuses] = useState(false)
 
   const handleAddSavings = async (data: Omit<Savings, "id" | "current_amount" | "created_at" | "updated_at">) => {
     await addSavings(data)
@@ -69,6 +74,15 @@ function SavingsPage() {
     setSelectedSavingsId("")
   }
 
+  const handleUpdateStatuses = async () => {
+    setIsUpdatingStatuses(true)
+    try {
+      await updateAllStatuses()
+    } finally {
+      setIsUpdatingStatuses(false)
+    }
+  }
+
   const getFilteredSavings = () => {
     switch (activeTab) {
       case "active":
@@ -85,30 +99,54 @@ function SavingsPage() {
   const activeSavingsCount = getActiveSavings().length
   const completedSavingsCount = getCompletedSavings().length
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High":
-        return "text-red-500 bg-red-50 dark:bg-red-900/20"
-      case "Medium":
-        return "text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20"
-      case "Low":
-        return "text-green-500 bg-green-50 dark:bg-green-900/20"
-      default:
-        return "text-gray-500 bg-gray-50 dark:bg-gray-900/20"
-    }
-  }
+  // Show setup message if table doesn't exist
+  if (!tableExists) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Savings Goals</h1>
+        </div>
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "text-blue-500 bg-blue-50 dark:bg-blue-900/20"
-      case "Completed":
-        return "text-green-500 bg-green-50 dark:bg-green-900/20"
-      case "Paused":
-        return "text-gray-500 bg-gray-50 dark:bg-gray-900/20"
-      default:
-        return "text-gray-500 bg-gray-50 dark:bg-gray-900/20"
-    }
+        <Card className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <Database className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-medium text-yellow-800 dark:text-yellow-200">
+                Savings Feature Setup Required
+              </h3>
+              <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                <p className="mb-3">
+                  The savings feature requires additional database tables. Please follow these steps to set it up:
+                </p>
+                <ol className="list-decimal list-inside space-y-2 ml-4">
+                  <li>Go to your Supabase dashboard</li>
+                  <li>Navigate to the SQL Editor</li>
+                  <li>Copy and paste the migration script from the project files</li>
+                  <li>Run the script to create the savings tables</li>
+                  <li>Refresh this page</li>
+                </ol>
+                <div className="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900/40 rounded-md">
+                  <p className="text-xs font-mono">
+                    File: <code>supabase/migrations/create_savings_tables_with_auto_status.sql</code>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {error && (
+          <Card className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+            </div>
+          </Card>
+        )}
+      </div>
+    )
   }
 
   if (loading) {
@@ -123,16 +161,27 @@ function SavingsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Savings Goals</h1>
-        <Button
-          onClick={() => {
-            setCurrentSavings(null)
-            setIsModalOpen(true)
-          }}
-          iconLeft={<Plus size={18} />}
-          variant="primary"
-        >
-          Add Savings Goal
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleUpdateStatuses}
+            variant="outline"
+            size="sm"
+            disabled={isUpdatingStatuses}
+            iconLeft={<RefreshCw size={16} className={isUpdatingStatuses ? "animate-spin" : ""} />}
+          >
+            {isUpdatingStatuses ? "Updating..." : "Update Statuses"}
+          </Button>
+          <Button
+            onClick={() => {
+              setCurrentSavings(null)
+              setIsModalOpen(true)
+            }}
+            iconLeft={<Plus size={18} />}
+            variant="primary"
+          >
+            Add Savings Goal
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

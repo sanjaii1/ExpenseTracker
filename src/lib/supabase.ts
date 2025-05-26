@@ -263,7 +263,51 @@ export const budgetService = {
   },
 }
 
-// Savings operations with better error handling
+// Helper function to check and update savings goal status
+const checkAndUpdateSavingsStatus = async (savingsId: string) => {
+  try {
+    // Get the current savings goal
+    const { data: savings, error: fetchError } = await supabase.from("savings").select("*").eq("id", savingsId).single()
+
+    if (fetchError || !savings) {
+      console.error("Error fetching savings for status update:", fetchError)
+      return
+    }
+
+    const currentAmount = Number(savings.current_amount)
+    const targetAmount = Number(savings.target_amount)
+    const currentStatus = savings.status
+
+    // Check if goal should be marked as completed
+    if (currentAmount >= targetAmount && currentStatus !== "Completed") {
+      console.log(`Updating savings ${savingsId} status to Completed (${currentAmount} >= ${targetAmount})`)
+
+      const { error: updateError } = await supabase.from("savings").update({ status: "Completed" }).eq("id", savingsId)
+
+      if (updateError) {
+        console.error("Error updating savings status:", updateError)
+      } else {
+        console.log("Successfully updated savings status to Completed")
+      }
+    }
+    // Check if completed goal should be marked as active (if amount drops below target)
+    else if (currentAmount < targetAmount && currentStatus === "Completed") {
+      console.log(`Updating savings ${savingsId} status to Active (${currentAmount} < ${targetAmount})`)
+
+      const { error: updateError } = await supabase.from("savings").update({ status: "Active" }).eq("id", savingsId)
+
+      if (updateError) {
+        console.error("Error updating savings status:", updateError)
+      } else {
+        console.log("Successfully updated savings status to Active")
+      }
+    }
+  } catch (error) {
+    console.error("Error in checkAndUpdateSavingsStatus:", error)
+  }
+}
+
+// Savings operations with better error handling and auto-status updates
 export const savingsService = {
   async getAll() {
     const user = await getCurrentUser()
@@ -361,6 +405,10 @@ export const savingsService = {
       }
       throw error
     }
+
+    // After updating, check if status needs to be updated based on current amount
+    await checkAndUpdateSavingsStatus(id)
+
     return data
   },
 
@@ -434,6 +482,9 @@ export const savingsService = {
         throw error
       }
 
+      // After creating a transaction, check if the savings goal status needs to be updated
+      await checkAndUpdateSavingsStatus(transaction.savings_id)
+
       return data
     } catch (error: any) {
       console.error("Error in savingsService.createTransaction:", error)
@@ -468,6 +519,28 @@ export const savingsService = {
     } catch (error: any) {
       console.error("Error in savingsService.getTransactionsBySavingsId:", error)
       throw error
+    }
+  },
+
+  // New function to manually update all savings statuses
+  async updateAllSavingsStatuses() {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    try {
+      // Get all savings for the user
+      const { data: allSavings, error } = await supabase.from("savings").select("*").eq("user_id", user.id)
+
+      if (error) throw error
+
+      // Check and update status for each savings goal
+      for (const savings of allSavings || []) {
+        await checkAndUpdateSavingsStatus(savings.id)
+      }
+
+      console.log("Updated statuses for all savings goals")
+    } catch (error) {
+      console.error("Error updating all savings statuses:", error)
     }
   },
 }

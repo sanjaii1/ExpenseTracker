@@ -22,6 +22,7 @@ interface SavingsContextType {
   getActiveSavings: () => Savings[]
   getCompletedSavings: () => Savings[]
   refetchSavings: () => Promise<void>
+  updateAllStatuses: () => Promise<void>
 }
 
 const SavingsContext = createContext<SavingsContextType>({
@@ -40,6 +41,7 @@ const SavingsContext = createContext<SavingsContextType>({
   getActiveSavings: () => [],
   getCompletedSavings: () => [],
   refetchSavings: async () => {},
+  updateAllStatuses: async () => {},
 })
 
 export function SavingsProvider({ children }: { children: React.ReactNode }) {
@@ -78,6 +80,9 @@ export function SavingsProvider({ children }: { children: React.ReactNode }) {
       }))
 
       setSavings(transformedData)
+
+      // After fetching, update statuses for any goals that should be completed
+      await updateAllStatuses()
     } catch (error: any) {
       console.error("Error fetching savings:", error)
 
@@ -124,6 +129,32 @@ export function SavingsProvider({ children }: { children: React.ReactNode }) {
       if (error.message?.includes("does not exist")) {
         setTableExists(false)
       }
+    }
+  }
+
+  const updateAllStatuses = async () => {
+    if (!tableExists) return
+
+    try {
+      await savingsService.updateAllSavingsStatuses()
+      // Refetch savings to get updated statuses
+      const data = await savingsService.getAll()
+      const transformedData: Savings[] = data.map((item) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        target_amount: Number(item.target_amount),
+        current_amount: Number(item.current_amount),
+        target_date: item.target_date,
+        category: item.category,
+        priority: item.priority as "Low" | "Medium" | "High",
+        status: item.status as "Active" | "Completed" | "Paused",
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }))
+      setSavings(transformedData)
+    } catch (error: any) {
+      console.error("Error updating all statuses:", error)
     }
   }
 
@@ -215,6 +246,9 @@ export function SavingsProvider({ children }: { children: React.ReactNode }) {
 
       setSavings((prev) => prev.map((s) => (s.id === id ? transformedSavings : s)))
       toast.success("Savings goal updated successfully")
+
+      // Refresh to get any automatic status updates
+      await fetchSavings()
     } catch (error: any) {
       console.error("Error updating savings:", error)
       if (error.message?.includes("does not exist")) {
@@ -277,7 +311,7 @@ export function SavingsProvider({ children }: { children: React.ReactNode }) {
 
       setSavingsTransactions((prev) => [transformedTransaction, ...prev])
 
-      // Refresh savings to get updated current_amount
+      // Refresh savings to get updated current_amount and status
       await fetchSavings()
 
       toast.success(`${transactionData.transaction_type === "deposit" ? "Deposit" : "Withdrawal"} added successfully`)
@@ -331,6 +365,7 @@ export function SavingsProvider({ children }: { children: React.ReactNode }) {
         getActiveSavings,
         getCompletedSavings,
         refetchSavings: fetchSavings,
+        updateAllStatuses,
       }}
     >
       {children}

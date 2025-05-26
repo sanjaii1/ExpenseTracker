@@ -9,6 +9,11 @@ import { useSavings } from "../../context/SavingsContext"
 import { formatCurrency } from "../../utils/formatters"
 import TransactionList from "../Transactions/TransactionList"
 import BudgetProgressList from "../Budget/BudgetProgressList"
+import ExpenseByCategory from "../Charts/ExpenseByCategory"
+import IncomeVsExpense from "../Charts/IncomeVsExpense"
+import SavingsProgress from "../Charts/SavingsProgress"
+import SpendingTrend from "../Charts/SpendingTrend"
+import FinancialHealthIndicator from "./FinancialHealthIndicator"
 
 type FilterPeriod = "day" | "week" | "month" | "year" | "custom"
 
@@ -171,8 +176,8 @@ function Dashboard() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Ultra Compact Filter - Inline with title */}
+    <div className="space-y-6">
+      {/* Header with Filter */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
 
@@ -264,6 +269,18 @@ function Dashboard() {
             </div>
           </Card>
         ))}
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <IncomeVsExpense dateRange={currentRange} />
+        <ExpenseByCategory dateRange={currentRange} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <SpendingTrend />
+        <SavingsProgress />
+        <FinancialHealthIndicator />
       </div>
 
       {/* Data Summary */}
