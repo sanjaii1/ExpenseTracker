@@ -263,6 +263,215 @@ export const budgetService = {
   },
 }
 
+// Savings operations with better error handling
+export const savingsService = {
+  async getAll() {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    await ensureUserProfile()
+
+    console.log("Fetching savings for user:", user.id)
+
+    try {
+      const { data, error } = await supabase
+        .from("savings")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        console.error("Supabase error fetching savings:", error)
+
+        // Check if table doesn't exist
+        if (
+          error.code === "42P01" ||
+          error.message?.includes("relation") ||
+          error.message?.includes("does not exist")
+        ) {
+          throw new Error("Savings table does not exist. Please run the database migration first.")
+        }
+
+        throw error
+      }
+
+      console.log("Successfully fetched savings:", data?.length || 0)
+      return data || []
+    } catch (error: any) {
+      console.error("Error in savingsService.getAll:", error)
+      throw error
+    }
+  },
+
+  async create(savings: Omit<Database["public"]["Tables"]["savings"]["Insert"], "user_id">) {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    await ensureUserProfile()
+
+    console.log("Creating savings for user:", user.id, savings)
+
+    try {
+      const { data, error } = await supabase
+        .from("savings")
+        .insert({
+          ...savings,
+          user_id: user.id,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error("Supabase error creating savings:", error)
+
+        if (
+          error.code === "42P01" ||
+          error.message?.includes("relation") ||
+          error.message?.includes("does not exist")
+        ) {
+          throw new Error("Savings table does not exist. Please run the database migration first.")
+        }
+
+        throw error
+      }
+
+      console.log("Successfully created savings:", data)
+      return data
+    } catch (error: any) {
+      console.error("Error in savingsService.create:", error)
+      throw error
+    }
+  },
+
+  async update(id: string, updates: Partial<Database["public"]["Tables"]["savings"]["Update"]>) {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    const { data, error } = await supabase
+      .from("savings")
+      .update(updates)
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select()
+      .single()
+
+    if (error) {
+      if (error.code === "42P01" || error.message?.includes("relation") || error.message?.includes("does not exist")) {
+        throw new Error("Savings table does not exist. Please run the database migration first.")
+      }
+      throw error
+    }
+    return data
+  },
+
+  async delete(id: string) {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    const { error } = await supabase.from("savings").delete().eq("id", id).eq("user_id", user.id)
+
+    if (error) {
+      if (error.code === "42P01" || error.message?.includes("relation") || error.message?.includes("does not exist")) {
+        throw new Error("Savings table does not exist. Please run the database migration first.")
+      }
+      throw error
+    }
+  },
+
+  async getAllTransactions() {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    try {
+      const { data, error } = await supabase
+        .from("savings_transactions")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+
+      if (error) {
+        if (
+          error.code === "42P01" ||
+          error.message?.includes("relation") ||
+          error.message?.includes("does not exist")
+        ) {
+          throw new Error("Savings transactions table does not exist. Please run the database migration first.")
+        }
+        throw error
+      }
+
+      return data || []
+    } catch (error: any) {
+      console.error("Error in savingsService.getAllTransactions:", error)
+      throw error
+    }
+  },
+
+  async createTransaction(
+    transaction: Omit<Database["public"]["Tables"]["savings_transactions"]["Insert"], "user_id">,
+  ) {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    try {
+      const { data, error } = await supabase
+        .from("savings_transactions")
+        .insert({
+          ...transaction,
+          user_id: user.id,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        if (
+          error.code === "42P01" ||
+          error.message?.includes("relation") ||
+          error.message?.includes("does not exist")
+        ) {
+          throw new Error("Savings transactions table does not exist. Please run the database migration first.")
+        }
+        throw error
+      }
+
+      return data
+    } catch (error: any) {
+      console.error("Error in savingsService.createTransaction:", error)
+      throw error
+    }
+  },
+
+  async getTransactionsBySavingsId(savingsId: string) {
+    const user = await getCurrentUser()
+    if (!user) throw new Error("User not authenticated")
+
+    try {
+      const { data, error } = await supabase
+        .from("savings_transactions")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("savings_id", savingsId)
+        .order("date", { ascending: false })
+
+      if (error) {
+        if (
+          error.code === "42P01" ||
+          error.message?.includes("relation") ||
+          error.message?.includes("does not exist")
+        ) {
+          throw new Error("Savings transactions table does not exist. Please run the database migration first.")
+        }
+        throw error
+      }
+
+      return data || []
+    } catch (error: any) {
+      console.error("Error in savingsService.getTransactionsBySavingsId:", error)
+      throw error
+    }
+  },
+}
+
 // User operations
 export const userService = {
   async getProfile() {
@@ -320,6 +529,8 @@ export const userService = {
     if (!user) throw new Error("User not authenticated")
 
     // Delete all user data in order (due to foreign key constraints)
+    await supabase.from("savings_transactions").delete().eq("user_id", user.id)
+    await supabase.from("savings").delete().eq("user_id", user.id)
     await supabase.from("transactions").delete().eq("user_id", user.id)
     await supabase.from("budgets").delete().eq("user_id", user.id)
     await supabase.from("users").delete().eq("id", user.id)

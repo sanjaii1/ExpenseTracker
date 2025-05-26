@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowUpCircle, ArrowDownCircle, Wallet, Landmark, Calendar, ChevronDown } from "lucide-react"
+import { ArrowUpCircle, ArrowDownCircle, Wallet, Calendar, ChevronDown, Target } from "lucide-react"
 import Card from "../UI/Card"
 import { useTransactions } from "../../context/TransactionContext"
 import { useBudgets } from "../../context/BudgetContext"
+import { useSavings } from "../../context/SavingsContext"
 import { formatCurrency } from "../../utils/formatters"
 import TransactionList from "../Transactions/TransactionList"
 import BudgetProgressList from "../Budget/BudgetProgressList"
@@ -19,6 +20,7 @@ interface DateRange {
 function Dashboard() {
   const { transactions, getTotalByType, loading: transactionsLoading, getFilteredTransactions } = useTransactions()
   const { budgets, loading: budgetsLoading } = useBudgets()
+  const { savings, getTotalSavings, getActiveSavings, loading: savingsLoading } = useSavings()
 
   // Default to current month
   const getCurrentMonthRange = (): DateRange => {
@@ -103,7 +105,8 @@ function Dashboard() {
     .reduce((total, t) => total + t.amount, 0)
 
   const balance = filteredIncome - filteredExpenses
-  const savings = balance > 0 ? balance : 0
+  const totalSavings = getTotalSavings()
+  const activeSavingsCount = getActiveSavings().length
 
   // Get recent transactions from filtered data
   const recentTransactions = filteredTransactions
@@ -151,15 +154,15 @@ function Dashboard() {
       textColor: "text-blue-500 dark:text-blue-400",
     },
     {
-      title: "Savings",
-      value: formatCurrency(savings),
-      icon: <Landmark className="text-purple-500" size={24} />,
+      title: "Total Savings",
+      value: formatCurrency(totalSavings),
+      icon: <Target className="text-purple-500" size={24} />,
       bgColor: "bg-purple-50 dark:bg-purple-900/20",
       textColor: "text-purple-500 dark:text-purple-400",
     },
   ]
 
-  if (transactionsLoading || budgetsLoading) {
+  if (transactionsLoading || budgetsLoading || savingsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
@@ -275,13 +278,59 @@ function Dashboard() {
           )}
         </Card>
 
-        <Card title="Budget Overview">
-          {budgets.length > 0 ? (
-            <BudgetProgressList budgets={budgets} />
-          ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-4">No budgets set</p>
-          )}
-        </Card>
+        <div className="space-y-6">
+          <Card title="Budget Overview">
+            {budgets.length > 0 ? (
+              <BudgetProgressList budgets={budgets} />
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No budgets set</p>
+            )}
+          </Card>
+
+          {/* Savings Overview */}
+          <Card title="Savings Overview">
+            {savings.length > 0 ? (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Total Saved</span>
+                  <span className="text-lg font-semibold text-purple-600 dark:text-purple-400">
+                    {formatCurrency(totalSavings)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Active Goals</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{activeSavingsCount}</span>
+                </div>
+                {getActiveSavings()
+                  .slice(0, 3)
+                  .map((savingsItem) => {
+                    const progress =
+                      savingsItem.target_amount > 0
+                        ? Math.min(100, (savingsItem.current_amount / savingsItem.target_amount) * 100)
+                        : 0
+                    return (
+                      <div key={savingsItem.id} className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                            {savingsItem.title}
+                          </span>
+                          <span className="text-xs text-gray-500">{Math.round(progress)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                          <div
+                            className="bg-purple-500 h-1.5 rounded-full transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No savings goals set</p>
+            )}
+          </Card>
+        </div>
       </div>
     </div>
   )

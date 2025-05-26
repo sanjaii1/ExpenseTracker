@@ -7,12 +7,14 @@ import Dashboard from "./components/Dashboard/Dashboard"
 import ExpensesPage from "./components/Expenses/ExpensesPage"
 import IncomePage from "./components/Income/IncomePage"
 import BudgetPage from "./components/Budget/BudgetPage"
+import SavingsPage from "./components/Savings/SavingsPage"
 import ReportsPage from "./components/Reports/ReportsPage"
 import SettingsPage from "./components/Settings/SettingsPage"
 import AuthForm from "./components/Auth/AuthForm"
 import { ThemeProvider } from "./context/ThemeContext"
 import { TransactionProvider } from "./context/TransactionContext"
 import { BudgetProvider } from "./context/BudgetContext"
+import { SavingsProvider } from "./context/SavingsContext"
 import { supabase, ensureUserProfile } from "./lib/supabase"
 
 interface Session {
@@ -122,6 +124,8 @@ function App() {
         return <IncomePage />
       case "budget":
         return <BudgetPage />
+      case "savings":
+        return <SavingsPage />
       case "reports":
       case "analytics":
         return <ReportsPage />
@@ -167,15 +171,17 @@ function App() {
     <ThemeProvider>
       <TransactionProvider>
         <BudgetProvider>
-          <div className="h-screen flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-            <Sidebar activeTab={activeTab} onTabChange={setActiveTab} session={session} />
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <main className="flex-1 overflow-y-auto p-4 md:p-6 mt-16 md:mt-0">
-                <div className="max-w-6xl mx-auto">{renderContent()}</div>
-              </main>
+          <SavingsProvider>
+            <div className="h-screen flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
+              <Sidebar activeTab={activeTab} onTabChange={setActiveTab} session={session} />
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 mt-16 md:mt-0">
+                  <div className="max-w-6xl mx-auto">{renderContent()}</div>
+                </main>
+              </div>
             </div>
-          </div>
-          <Toaster position="top-right" />
+            <Toaster position="top-right" />
+          </SavingsProvider>
         </BudgetProvider>
       </TransactionProvider>
     </ThemeProvider>
